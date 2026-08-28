@@ -1,6 +1,6 @@
 {
-  "id": "drag-and-drop-task-planner",
-  "name": "Task Planner",
+  "id": "task-calendar",
+  "name": "Task Calendar",
   "version": "1.6.1",
   "minAppVersion": "1.9.0",
   "description": "Drag task notes from a Base onto a day/week planner grid. Frontmatter is the only source of truth - no checkbox lines required.",
