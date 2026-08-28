@@ -1,7 +1,7 @@
 # Task Calendar
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.6.1-green.svg)](manifest.json)
+[![Version](https://img.shields.io/badge/version-1.6.2-green.svg)](manifest.json)
 [![Obsidian 1.9.0+](https://img.shields.io/badge/obsidian-1.9.0%2B-7c3aed.svg)](https://obsidian.md)
 [![Donate](https://img.shields.io/badge/donate-a%20cup%20of%20porridge-635bff.svg?logo=stripe&logoColor=white)](https://donate.stripe.com/5kQcN4eN5bvOcVX317f7i00)
 
