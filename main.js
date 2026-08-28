@@ -758,8 +758,14 @@ class TaskPlannerPlugin extends Plugin {
       L.push('- ' + id + ': ' + (this.app.plugins.plugins[id] ? '**ENABLED**' : 'off'));
     }
 
-    await this.app.vault.adapter.write('task-planner-diagnostics.md', L.join('\n'));
-    new Notice('Wrote task-planner-diagnostics.md');
+    /* Vault API rather than the adapter: it is cached, serialised against other
+     * writes, and keeps the metadata cache in step. */
+    const path = 'task-planner-diagnostics.md';
+    const body = L.join('\n');
+    const existing = this.app.vault.getAbstractFileByPath(path);
+    if (existing instanceof TFile) await this.app.vault.modify(existing, body);
+    else await this.app.vault.create(path, body);
+    new Notice('Wrote ' + path);
   }
 
   /* ---------------- alarms ---------------- */

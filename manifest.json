@@ -6,5 +6,6 @@
   "description": "Drag task notes from a Base onto a day/week planner grid. Frontmatter is the only source of truth - no checkbox lines required.",
   "author": "Spencer Frame",
   "authorUrl": "https://github.com/spencerframe",
-  "isDesktopOnly": true
+  "isDesktopOnly": true,
+  "fundingUrl": "https://donate.stripe.com/5kQcN4eN5bvOcVX317f7i00"
 }
