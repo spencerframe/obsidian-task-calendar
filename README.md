@@ -1,4 +1,4 @@
-# Task Planner
+# Task Calendar
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.6.1-green.svg)](manifest.json)
