@@ -9,6 +9,11 @@ A drag-and-drop day planner for Obsidian that schedules real notes. It will not
 do the tasks for you. Nothing will do the tasks for you. That is the one feature
 everybody wants and the one feature nobody ships.
 
+![Task Planner in action: dragging tasks from a Base onto the planner grid](assets/demo.gif)
+
+<sub>Dragging real notes onto real time. The tasks are fictional. The
+avoidance is not.</sub>
+
 Every task is a note in one folder, surfaced through one **Base**. You drag a row
 from that Base onto a calendar grid and it becomes a scheduled block. No checkbox
 lines, no `- [ ] 09:00 - 10:00` strings scattered across a hundred daily notes —
