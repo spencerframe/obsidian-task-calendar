@@ -1,0 +1,6 @@
+# Local plugin state - never commit, it contains private calendar URLs
+data.json
+
+node_modules/
+.DS_Store
+*.zip

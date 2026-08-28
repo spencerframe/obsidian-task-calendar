@@ -1,0 +1,392 @@
+/* Task Planner
+ * Categorical hues validated all-pairs in both modes. Light and dark are
+ * separately selected steps of the same hues, not an automatic flip. */
+
+.tp-host { padding: 0 !important; overflow: hidden; }
+
+/* The palette lives on every root that paints a category swatch, not just the
+ * view - modals are portalled to <body> and would otherwise resolve --tp-c to
+ * an undefined var and render colourless. */
+.tp-root, .tp-alarm-modal, .tp-new-modal {
+  --tp-violet:  #4a3aa7;
+  --tp-yellow:  #eda100;
+  --tp-green:   #008300;
+  --tp-magenta: #e87ba4;
+  --tp-blue:    #2a78d6;
+  --tp-orange:  #eb6834;
+  --tp-aqua:    #1baf7a;
+  --tp-red:     #e34948;
+  --tp-other:   #6b7280;
+  --tp-tint: 13%;
+  --tp-edge: 34%;
+}
+.theme-dark .tp-root, .theme-dark .tp-alarm-modal, .theme-dark .tp-new-modal {
+  --tp-violet:  #9085e9;
+  --tp-yellow:  #c98500;
+  --tp-green:   #008300;
+  --tp-magenta: #d55181;
+  --tp-blue:    #3987e5;
+  --tp-orange:  #d95926;
+  --tp-aqua:    #199e70;
+  --tp-red:     #e66767;
+  --tp-other:   #9aa1ad;
+  --tp-tint: 20%;
+  --tp-edge: 44%;
+}
+.tp-root {
+  --tp-gutter: 62px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+[data-color="violet"]  { --tp-c: var(--tp-violet); }
+[data-color="yellow"]  { --tp-c: var(--tp-yellow); }
+[data-color="green"]   { --tp-c: var(--tp-green); }
+[data-color="magenta"] { --tp-c: var(--tp-magenta); }
+[data-color="blue"]    { --tp-c: var(--tp-blue); }
+[data-color="orange"]  { --tp-c: var(--tp-orange); }
+[data-color="aqua"]    { --tp-c: var(--tp-aqua); }
+[data-color="red"]     { --tp-c: var(--tp-red); }
+[data-color="other"]   { --tp-c: var(--tp-other); }
+
+/* ---------------- toolbar ---------------- */
+.tp-toolbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  flex: 0 0 auto;
+}
+.tp-spacer { flex: 1 1 auto; }
+.tp-group { display: flex; align-items: center; gap: 2px; }
+.tp-btn {
+  padding: 4px 10px; font-size: var(--font-ui-small);
+  background: transparent; border: 1px solid transparent;
+  border-radius: var(--radius-s); color: var(--text-muted);
+  cursor: pointer; box-shadow: none;
+}
+.tp-btn:hover { background: var(--background-modifier-hover); color: var(--text-normal); }
+.tp-btn-sm { padding: 4px 8px; min-width: 26px; }
+.tp-btn-fit { position: relative; width: 28px; min-width: 28px; height: 24px; }
+.tp-btn-fit::before {
+  content: ''; position: absolute; inset: 0; margin: auto;
+  width: 11px; height: 13px; border: 1.5px solid currentColor; border-radius: 2px;
+}
+.tp-btn-fit.is-active { color: var(--text-accent); background: var(--background-modifier-active-hover); }
+.tp-btn-fit.is-active::before { background: currentColor; }
+.tp-btn.is-active { background: var(--background-modifier-active-hover); color: var(--text-accent); font-weight: 600; }
+.tp-range { font-size: var(--font-ui-medium); font-weight: 600; color: var(--text-normal); }
+.tp-modes {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-s); padding: 1px; gap: 1px;
+}
+.tp-modes .tp-btn { white-space: nowrap; }
+
+/* ---------------- grid ---------------- */
+.tp-scroll { flex: 1 1 auto; overflow: auto; position: relative; }
+.tp-grid {
+  display: grid;
+  grid-template-columns: var(--tp-gutter) repeat(var(--tp-cols), minmax(0, 1fr));
+  grid-template-rows: auto var(--tp-body-h);
+  align-content: start;   /* never stretch the header row to fill the pane */
+  min-height: 100%;
+}
+
+.tp-corner {
+  position: sticky; top: 0; left: 0; z-index: 5;
+  background: var(--background-primary);
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+.tp-head {
+  position: sticky; top: 0; z-index: 4;
+  background: var(--background-primary);
+  border-bottom: 1px solid var(--background-modifier-border);
+  border-left: 1px solid var(--background-modifier-border);
+  padding: 6px 6px 4px;
+  text-align: center;
+}
+.tp-head-dow {
+  font-size: var(--font-ui-smaller); text-transform: uppercase;
+  letter-spacing: .06em; color: var(--text-muted);
+}
+.tp-head-num { font-size: 20px; font-weight: 600; color: var(--text-normal); line-height: 1.15; }
+.tp-head.is-today .tp-head-num { color: var(--text-on-accent); background: var(--interactive-accent);
+  border-radius: 999px; width: 30px; height: 30px; margin: 1px auto 0;
+  display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.tp-head.is-today .tp-head-dow { color: var(--text-accent); }
+
+.tp-allday { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+.tp-allday-chip {
+  font-size: var(--font-ui-smaller); text-align: left;
+  padding: 1px 5px; border-radius: 3px;
+  background: var(--background-modifier-hover);
+  border-left: 3px solid var(--tp-c, var(--text-faint));
+  color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tp-allday-more { font-size: var(--font-ui-smaller); color: var(--text-faint); text-align: left; padding-left: 5px; }
+
+/* ---------------- ruler ---------------- */
+.tp-ruler { position: relative; }
+.tp-ruler-h { height: var(--tp-hour-h); position: relative; }
+.tp-ruler-label {
+  position: absolute; top: -7px; right: 8px;
+  font-size: var(--font-ui-smaller); color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+.tp-ruler-h:first-child .tp-ruler-label { top: 0; }
+
+/* ---------------- columns ---------------- */
+.tp-col {
+  position: relative;
+  border-left: 1px solid var(--background-modifier-border);
+}
+.tp-col.is-today { background: color-mix(in oklab, var(--interactive-accent) 4%, transparent); }
+.tp-lines { position: absolute; inset: 0; }
+.tp-hline { height: var(--tp-hour-h); border-top: 1px solid var(--background-modifier-border); opacity: .5; }
+.tp-layer { position: absolute; inset: 0; }
+
+/* now indicator */
+.tp-now {
+  position: absolute; left: 0; right: 0; height: 0; z-index: 60;
+  border-top: 2px solid var(--color-red); pointer-events: none;
+}
+.tp-now::before {
+  content: ''; position: absolute; left: -4px; top: -4px;
+  width: 7px; height: 7px; border-radius: 50%; background: var(--color-red);
+}
+
+/* ---------------- task blocks ---------------- */
+.tp-block {
+  position: absolute;
+  border-radius: 5px;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  /* stops the browser claiming the gesture for scroll/zoom before pointermove */
+  touch-action: none;
+  -webkit-user-drag: none;
+  background: color-mix(in oklab, var(--tp-c) var(--tp-tint), var(--background-primary));
+  border: 1px solid color-mix(in oklab, var(--tp-c) var(--tp-edge), var(--background-primary));
+  /* 2px surface ring keeps abutting blocks from reading as one shape */
+  box-shadow: 0 0 0 1.5px var(--background-primary);
+  transition: box-shadow 80ms ease, filter 80ms ease;
+  padding-top: 2px;
+}
+.tp-block:hover { filter: brightness(1.04); box-shadow: 0 0 0 1.5px var(--background-primary), 0 2px 8px rgba(0,0,0,.18); }
+.tp-block.is-source { opacity: .35; }
+.tp-block.is-clipped-top { border-top-left-radius: 0; border-top-right-radius: 0; border-top-style: dashed; }
+.tp-block.is-clipped-bottom { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom-style: dashed; }
+
+.tp-block-accent { position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--tp-c); }
+/* Badge and text are laid out as a row rather than the badge being pinned, so
+   the circle tracks the title's first line at any UI font size. */
+.tp-block-body {
+  display: flex; align-items: flex-start; gap: 5px;
+  padding: 2px 5px 2px 8px; height: 100%; overflow: hidden;
+}
+.tp-block-text { flex: 1 1 auto; min-width: 0; overflow: hidden; }
+.tp-block.is-compact .tp-block-body { padding-top: 1px; }
+
+/* calendar events read as first-class blocks, marked by an icon rather than
+   by being faded out */
+.tp-block-cal { cursor: default; }
+.tp-block-cal .tp-block-title { font-weight: 500; }
+
+/* --tp-line is the title's line box; centring the badge against it keeps the
+   circle on the same optical line as the first row of text. */
+.tp-block { --tp-line: calc(var(--font-ui-small) * 1.25); --tp-badge-size: 19px; }
+.tp-block.is-compact { --tp-badge-size: 14px; }
+.tp-badge {
+  position: relative; z-index: 3;            /* above the top resize handle */
+  flex: 0 0 auto;
+  width: var(--tp-badge-size); height: var(--tp-badge-size);
+  box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: calc((var(--tp-line) - var(--tp-badge-size)) / 2);
+  top: 2px;
+}
+.tp-badge-cal { color: var(--tp-c); }
+.tp-badge-cal svg { width: calc(var(--tp-badge-size) - 4px); height: calc(var(--tp-badge-size) - 4px); }
+
+.tp-check {
+  position: relative;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in oklab, var(--tp-c) 55%, var(--background-primary));
+  background: var(--background-primary);
+  cursor: pointer;
+  transition: background 90ms ease, border-color 90ms ease;
+  top: 4px;
+}
+/* generous tap target without growing the drawn circle */
+.tp-check::before {
+  content: ''; position: absolute; inset: -5px -3px -5px -5px; border-radius: 50%;
+}
+.tp-check::after {
+  content: ''; width: 44%; height: 22%; margin-top: -12%;
+  border-left: 2.5px solid var(--tp-c);
+  border-bottom: 2.5px solid var(--tp-c);
+  transform: rotate(-45deg);
+  opacity: 0;
+}
+.tp-check:hover { border-color: var(--tp-c); background: color-mix(in oklab, var(--tp-c) 18%, var(--background-primary)); }
+.tp-check:hover::after { opacity: .55; }
+.tp-check.is-done { background: var(--tp-c); border-color: var(--tp-c); }
+.tp-check.is-done::after { opacity: 1; border-left-color: var(--background-primary); border-bottom-color: var(--background-primary); }
+.tp-block-title {
+  font-size: var(--font-ui-small); font-weight: 550; line-height: 1.25;
+  color: var(--text-normal);
+  overflow: hidden; text-overflow: ellipsis; display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+}
+.tp-block-meta {
+  display: flex; gap: 6px; align-items: baseline;
+  font-size: var(--font-ui-smaller); color: var(--text-muted); margin-top: 1px;
+}
+.tp-block-time { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tp-block-cat { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-faint); }
+
+.tp-block.is-done { opacity: .55; }
+.tp-block.is-done .tp-block-title { text-decoration: line-through; color: var(--text-muted); }
+
+.tp-handle { position: absolute; left: 0; right: 0; height: 6px; cursor: ns-resize; z-index: 2; }
+.tp-handle-top { top: 0; }
+.tp-handle-bottom { bottom: 0; }
+.tp-block:hover .tp-handle::after {
+  content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+  width: 22px; height: 2px; border-radius: 2px;
+  background: color-mix(in oklab, var(--tp-c) 70%, var(--background-primary));
+}
+.tp-handle-top::after { top: 1px; }
+.tp-handle-bottom::after { bottom: 1px; }
+
+/* ---------------- ghosts ---------------- */
+.tp-ghost {
+  position: absolute; left: 0; right: 3px; z-index: 10;
+  border-radius: 5px; pointer-events: none; overflow: hidden;
+  padding: 2px 6px;
+  background: color-mix(in oklab, var(--tp-c, var(--interactive-accent)) 22%, var(--background-primary));
+  border: 1px solid var(--tp-c, var(--interactive-accent));
+  box-shadow: 0 4px 14px rgba(0,0,0,.22);
+}
+.tp-ghost-drop { border-style: dashed; }
+.tp-ghost-title {
+  font-size: var(--font-ui-small); font-weight: 600; color: var(--text-normal);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tp-ghost-time { font-size: var(--font-ui-smaller); color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+body.tp-is-dragging { cursor: grabbing !important; }
+body.tp-is-dragging .tp-block { cursor: grabbing; }
+
+/* ---------------- settings swatch ---------------- */
+.tp-swatch {
+  display: inline-block; width: 11px; height: 11px; border-radius: 3px;
+  margin-right: 7px; vertical-align: baseline;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.18);
+}
+.theme-dark .tp-swatch { background: var(--tp-sw-dark) !important; }
+
+/* ---------------- settings: calendar list ---------------- */
+.tp-cal-box {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  padding: 0 12px;
+  margin: 10px 0;
+  background: var(--background-secondary);
+}
+.tp-cal-box .setting-item { border-top: none; padding: 10px 0; }
+.tp-cal-box .setting-item + .setting-item { border-top: 1px solid var(--background-modifier-border); }
+.tp-cal-box input[type="text"] { min-width: 220px; }
+.tp-cal-error { color: var(--text-error); margin: 0 0 10px; }
+
+/* ---------------- alarm ---------------- */
+.tp-alarm-modal { max-width: 440px; }
+.tp-alarm-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.tp-alarm-bell { display: flex; color: var(--color-red); }
+.tp-alarm-bell svg { width: 26px; height: 26px; animation: tp-shake 1.4s ease-in-out infinite; }
+@keyframes tp-shake {
+  0%, 60%, 100% { transform: rotate(0deg); }
+  5%, 15%, 25%  { transform: rotate(13deg); }
+  10%, 20%, 30% { transform: rotate(-13deg); }
+}
+@media (prefers-reduced-motion: reduce) { .tp-alarm-bell svg { animation: none; } }
+.tp-alarm-heading { font-size: var(--font-ui-large); font-weight: 650; }
+.tp-alarm-row {
+  position: relative; display: flex; align-items: stretch;
+  border-radius: var(--radius-s); overflow: hidden;
+  background: color-mix(in oklab, var(--tp-c) var(--tp-tint), var(--background-primary));
+  border: 1px solid color-mix(in oklab, var(--tp-c) var(--tp-edge), var(--background-primary));
+  margin-bottom: 8px;
+}
+.tp-alarm-accent { width: 4px; background: var(--tp-c); flex: 0 0 4px; }
+.tp-alarm-body { padding: 8px 12px; }
+.tp-alarm-title { font-weight: 600; color: var(--text-normal); }
+.tp-alarm-meta { font-size: var(--font-ui-small); color: var(--text-muted); margin-top: 2px; }
+.tp-alarm-buttons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+/* ---------------- create-by-drag ghost ---------------- */
+.tp-ghost-create {
+  --tp-c: var(--interactive-accent);
+  border-style: dashed;
+}
+.tp-ghost-create .tp-ghost-title { color: var(--text-muted); font-weight: 500; }
+.tp-col { cursor: cell; }
+body.tp-is-creating { cursor: cell !important; }
+body.tp-is-creating * { cursor: cell !important; }
+
+/* ---------------- new task modal ---------------- */
+.tp-new-modal { max-width: 460px; }
+.tp-new-head {
+  font-size: var(--font-ui-large); font-weight: 600; color: var(--text-normal);
+}
+.tp-new-when {
+  font-size: var(--font-ui-small); color: var(--text-muted);
+  font-variant-numeric: tabular-nums; margin: 2px 0 12px;
+}
+.tp-new-modal .setting-item { padding: 9px 0; border-top: none; }
+.tp-new-modal .setting-item + .setting-item { border-top: 1px solid var(--background-modifier-border); }
+.tp-new-modal input.tp-new-title { width: 240px; }
+.tp-new-buttons {
+  display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px;
+}
+
+/* ---------------- new task: task picker ---------------- */
+.tp-new-title-row { border-bottom: none; }
+.tp-sugg {
+  max-height: 244px; overflow-y: auto;
+  margin: 0 0 4px; padding: 4px;
+  background: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-s, 0 6px 20px rgba(0,0,0,.28));
+}
+.tp-sugg-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 6px 8px; border-radius: var(--radius-s); cursor: pointer;
+}
+.tp-sugg-item.is-active { background: var(--background-modifier-hover); }
+.tp-sugg-dot {
+  flex: 0 0 auto; width: 8px; height: 8px; margin-top: 5px;
+  border-radius: 50%; background: var(--tp-c, var(--text-muted));
+}
+.tp-sugg-main { min-width: 0; }
+.tp-sugg-title {
+  font-size: var(--font-ui-small); color: var(--text-normal);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tp-sugg-meta {
+  font-size: var(--font-ui-smaller); color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tp-sugg-new {
+  padding: 6px 8px; margin-top: 2px;
+  border-top: 1px solid var(--background-modifier-border);
+  font-size: var(--font-ui-smaller); color: var(--text-muted); cursor: pointer;
+}
+.tp-sugg-new:hover { color: var(--text-normal); }
+.tp-new-modal.is-picked input.tp-new-title {
+  font-weight: 600;
+  border-color: var(--interactive-accent);
+}

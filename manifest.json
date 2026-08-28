@@ -1,0 +1,10 @@
+{
+  "id": "task-planner",
+  "name": "Task Planner",
+  "version": "1.6.1",
+  "minAppVersion": "1.9.0",
+  "description": "Drag task notes from a Base onto a day/week planner grid. Frontmatter is the only source of truth - no checkbox lines required.",
+  "author": "Spencer Frame",
+  "authorUrl": "https://github.com/spencerframe",
+  "isDesktopOnly": true
+}
