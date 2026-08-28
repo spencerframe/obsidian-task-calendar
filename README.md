@@ -9,7 +9,7 @@ A drag-and-drop day planner for Obsidian that schedules real notes. It will not
 do the tasks for you. Nothing will do the tasks for you. That is the one feature
 everybody wants and the one feature nobody ships.
 
-![Task Planner in action: dragging tasks from a Base onto the planner grid](assets/demo.gif)
+![Task Calendar in action: dragging tasks from a Base onto the planner grid](assets/demo.gif)
 
 <sub>Dragging real notes onto real time. The tasks are fictional. The
 avoidance is not.</sub>
@@ -33,7 +33,7 @@ Most Obsidian task workflows spread state across the vault: a checkbox here, a
 something and you are hand-editing three files and hoping the regexes agree.
 They do not agree. They have never agreed.
 
-Task Planner inverts that. One folder of task notes. One Base to filter and sort
+Task Calendar inverts that. One folder of task notes. One Base to filter and sort
 them. One grid to place them on. Move a block and the plugin rewrites two
 frontmatter fields — that is the entire write path, so it is always
 round-trippable and never mangles your prose.
@@ -74,18 +74,23 @@ you are planning tomorrow instead of sleeping.
 
 ## Install
 
-### From a release (recommended)
+### From Obsidian (recommended)
+
+**Settings → Community plugins → Browse**, search for **Task Calendar**, install,
+enable. Done. This is also how you get updates without thinking about it.
+
+### From a release
 
 1. Download `main.js`, `manifest.json`, and `styles.css` from the
-   [latest release](https://github.com/spencerframe/obsidian-task-planner/releases/latest).
-2. Drop them into `<your vault>/.obsidian/plugins/task-planner/`.
+   [latest release](https://github.com/spencerframe/obsidian-task-calendar/releases/latest).
+2. Drop them into `<your vault>/.obsidian/plugins/task-calendar/`.
 3. In Obsidian: **Settings → Community plugins → Reload**, then enable
-   **Task Planner**.
+   **Task Calendar**.
 
 ### With BRAT
 
 Install [BRAT](https://github.com/TfTHacker/obsidian42-brat), then
-**Add beta plugin** → `spencerframe/obsidian-task-planner`.
+**Add beta plugin** → `spencerframe/obsidian-task-calendar`.
 
 ### From source
 
@@ -93,8 +98,8 @@ There is no build step. There is no bundler, no config file, no `postinstall`
 script that downloads a second package manager. It is one JavaScript file.
 
 ```bash
-git clone https://github.com/spencerframe/obsidian-task-planner \
-  "<your vault>/.obsidian/plugins/task-planner"
+git clone https://github.com/spencerframe/obsidian-task-calendar \
+  "<your vault>/.obsidian/plugins/task-calendar"
 ```
 
 ---
@@ -177,7 +182,7 @@ to a dopamine loop.
 
 ### 4. Open the planner and drag
 
-Click the calendar-clock ribbon icon, or run **Task Planner: Open calendar** from
+Click the calendar-clock ribbon icon, or run **Task Calendar: Open calendar** from
 the command palette. Put the Base in one pane and the planner in another, then
 drag rows across. That's the app.
 
@@ -204,7 +209,7 @@ second option is how you finally schedule the thing from four months ago.
 
 ## Calendar feeds
 
-**Settings → Task Planner → Calendars → Feeds → Add.** Paste an ICS URL and pick
+**Settings → Task Calendar → Calendars → Feeds → Add.** Paste an ICS URL and pick
 a colour, or map the feed to a category so it inherits that category's colour.
 
 In Google Calendar the URL you want is under
