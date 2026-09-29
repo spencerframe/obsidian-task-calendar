@@ -777,6 +777,7 @@ class TaskPlannerPlugin extends Plugin {
     if (s.alarmForEvents) {
       for (const e of ((this.gcache && this.gcache.events) || [])) {
         if (e.allDay) continue;
+        if (!this.calAlarms(e.calId)) continue;
         out.push({ key: this.alarmKey('cal', e.calId, e.start), title: e.title,
                    start: e.start, sub: e.calName, spec: this.calColorSpec(e.calId) });
       }
@@ -910,6 +911,13 @@ class TaskPlannerPlugin extends Plugin {
   }
 
   calById(id) { return (this.settings.calendars || []).find((c) => c.id === id) || null; }
+
+  /* Per-calendar alarm switch. A calendar saved before 1.7.0 has no `alarms`
+   * key and keeps ringing, so upgrading never silently drops an alarm. */
+  calAlarms(calId) {
+    const cal = this.calById(calId);
+    return !!cal && cal.alarms !== false;
+  }
 
   /* A calendar linked to a category inherits that category's colour. */
   calColorSpec(calId) {
@@ -2669,8 +2677,13 @@ class TaskPlannerSettingTab extends PluginSettingTab {
       .addSlider((sl) => sl.setLimits(0, 30, 1).setValue(Number(s.alarmLeadMinutes) || 2).setDynamicTooltip()
         .onChange(async (v) => { s.alarmLeadMinutes = v; await save(); }));
 
+    const ringing = (s.calendars || []).filter((c) => c.enabled !== false && c.alarms !== false);
     new Setting(containerEl).setName('Alarm for calendar events')
-      .addToggle((t) => t.setValue(s.alarmForEvents).onChange(async (v) => { s.alarmForEvents = v; await save(); }));
+      .setDesc(!(s.calendars || []).length ? 'No calendars configured.'
+        : !ringing.length ? 'No calendar has alarms on. Turn them on per calendar under Calendars below.'
+        : (s.alarmForEvents ? 'Rings for: ' : 'Off. When on, rings for: ')
+          + ringing.map((c) => c.name || 'Untitled').join(', ') + '. Choose per calendar under Calendars below.')
+      .addToggle((t) => t.setValue(s.alarmForEvents).onChange(async (v) => { s.alarmForEvents = v; await save(); this.display(); }));
 
     new Setting(containerEl).setName('Alarm for scheduled tasks')
       .setDesc('Off by default, so a full planner does not become a full day of alarms.')
@@ -2726,7 +2739,7 @@ class TaskPlannerSettingTab extends PluginSettingTab {
       }))
       .addButton((b) => b.setButtonText('+ Add calendar').setCta().onClick(async () => {
         s.calendars = s.calendars || [];
-        s.calendars.push({ id: 'cal' + Date.now(), name: 'New calendar', url: '', color: '#6b7280', category: '', enabled: true });
+        s.calendars.push({ id: 'cal' + Date.now(), name: 'New calendar', url: '', color: '#6b7280', category: '', enabled: true, alarms: true });
         await save();
         this.display();
       }));
@@ -2739,7 +2752,7 @@ class TaskPlannerSettingTab extends PluginSettingTab {
         .addText((t) => t.setPlaceholder('Name').setValue(cal.name || '')
           .onChange(async (v) => { cal.name = v; await save(); }))
         .addToggle((t) => t.setValue(cal.enabled !== false)
-          .onChange(async (v) => { cal.enabled = v; p.gcache.at = 0; await save(); if (v) { await p.loadCalendars(true); } p.refreshViews(); }))
+          .onChange(async (v) => { cal.enabled = v; p.gcache.at = 0; await save(); if (v) { await p.loadCalendars(true); } p.refreshViews(); this.display(); }))
         .addExtraButton((b) => b.setIcon('trash-2').setTooltip('Remove this calendar').onClick(async () => {
           s.calendars = s.calendars.filter((c) => c !== cal);
           p.gcache.at = 0;
@@ -2750,6 +2763,13 @@ class TaskPlannerSettingTab extends PluginSettingTab {
       new Setting(box).setName('ICS URL')
         .addText((t) => t.setPlaceholder('https://... .ics').setValue(cal.url || '')
           .onChange(async (v) => { cal.url = v.trim(); p.gcache.at = 0; await save(); }));
+
+      new Setting(box).setName('Alarms')
+        .setDesc(!s.alarmForEvents ? 'Calendar-event alarms are off globally (Alarms, above).'
+          : cal.enabled === false ? 'This calendar is hidden, so it will not ring either way.'
+          : 'Ring for this calendar\'s timed events.')
+        .addToggle((t) => t.setValue(cal.alarms !== false)
+          .onChange(async (v) => { cal.alarms = v; await save(); this.display(); }));
 
       const colour = new Setting(box).setName('Colour')
         .setDesc(cal.category

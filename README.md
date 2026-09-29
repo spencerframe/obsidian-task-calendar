@@ -1,7 +1,7 @@
 # Task Calendar
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.6.2-green.svg)](manifest.json)
+[![Version](https://img.shields.io/badge/version-1.7.0-green.svg)](manifest.json)
 [![Obsidian 1.9.0+](https://img.shields.io/badge/obsidian-1.9.0%2B-7c3aed.svg)](https://obsidian.md)
 [![Donate](https://img.shields.io/badge/donate-a%20cup%20of%20porridge-635bff.svg?logo=stripe&logoColor=white)](https://donate.stripe.com/5kQcN4eN5bvOcVX317f7i00)
 
@@ -236,6 +236,12 @@ for calendar events, scheduled tasks, or both. **Test the alarm sound** in the
 command palette plays one immediately, so you can find out how loud it is on
 your terms rather than during a meeting.
 
+Calendar-event alarms are **per calendar**. Each feed under **Calendars** has
+its own **Alarms** toggle, so your work calendars can ring while the personal
+one full of "Bedtime" reminders stays quiet. The **Alarm for calendar events**
+setting lists exactly which calendars will ring, so you never have to guess
+where a 9:30pm alarm is coming from. Calendars added before 1.7.0 default to on.
+
 ---
 
 ## Settings reference
@@ -245,8 +251,8 @@ your terms rather than during a meeting.
 | **Tasks**      | Task folder · property names · use estimate as duration · default duration · auto status · show completed |
 | **Grid**       | Day start/end hour · snap minutes · row height (px per hour) · fit to window · first day of week |
 | **Categories** | Per-category colours, rescan categories                                                       |
-| **Alarms**     | Enable · lead time · events/tasks · volume · custom sound · system notification               |
-| **Calendars**  | Show events · feeds (name, ICS URL, colour or category)                                        |
+| **Alarms**     | Enable · lead time · events/tasks · volume · custom sound · system notification · per-calendar (under Calendars) |
+| **Calendars**  | Show events · feeds (name, ICS URL, alarms on/off, colour or category)                         |
 
 ---
 
