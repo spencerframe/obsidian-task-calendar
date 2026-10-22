@@ -258,6 +258,22 @@ class TaskPlannerPlugin extends Plugin {
 
     this.registerEvent(this.app.vault.on('rename', () => this.scheduleRefresh()));
     this.registerEvent(this.app.vault.on('delete', () => this.scheduleRefresh()));
+
+    /* Right-clicking a note's name in a Base opens Obsidian's own file menu, as
+     * do the file explorer, tab headers and links. Hooking that menu rather
+     * than Bases' markup means the item shows up everywhere a task note does. */
+    this.registerEvent(this.app.workspace.on('file-menu', (menu, file) => {
+      if (!(file instanceof TFile) || !this.isTaskNote(file)) return;
+      const fm = (this.app.metadataCache.getFileCache(file) || {}).frontmatter || {};
+      const done = toArray(fm[this.settings.statusProp]).some((x) => x.toLowerCase() === 'done');
+      menu.addItem((i) => i.setSection('action')
+        .setTitle(done ? 'Mark not complete' : 'Mark complete')
+        .setIcon(done ? 'rotate-ccw' : 'check-circle')
+        .onClick(async () => {
+          await this.setDone(file, !done);
+          new Notice(done ? `Reopened ${file.basename}` : `Completed ${file.basename}`);
+        }));
+    }));
   }
 
   onunload() {
