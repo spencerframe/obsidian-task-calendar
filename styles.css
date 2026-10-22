@@ -176,6 +176,14 @@
 }
 .tp-block:hover { filter: brightness(1.04); box-shadow: 0 0 0 1.5px var(--background-primary), 0 2px 8px rgba(0,0,0,.18); }
 .tp-block.is-source { opacity: .35; }
+.tp-block.is-revealed { animation: tp-reveal 0.8s ease-in-out 3; }
+@keyframes tp-reveal {
+  0%, 100% { box-shadow: 0 0 0 1.5px var(--background-primary); }
+  50%      { box-shadow: 0 0 0 1.5px var(--background-primary), 0 0 0 4px var(--tp-c); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tp-block.is-revealed { animation: none; box-shadow: 0 0 0 1.5px var(--background-primary), 0 0 0 3px var(--tp-c); }
+}
 .tp-block.is-clipped-top { border-top-left-radius: 0; border-top-right-radius: 0; border-top-style: dashed; }
 .tp-block.is-clipped-bottom { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom-style: dashed; }
 

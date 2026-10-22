@@ -266,6 +266,12 @@ class TaskPlannerPlugin extends Plugin {
       if (!(file instanceof TFile) || !this.isTaskNote(file)) return;
       const fm = (this.app.metadataCache.getFileCache(file) || {}).frontmatter || {};
       const done = toArray(fm[this.settings.statusProp]).some((x) => x.toLowerCase() === 'done');
+      const start = parseDT(fm[this.settings.startProp]);
+      if (start) {
+        menu.addItem((i) => i.setSection('action')
+          .setTitle('Reveal in calendar').setIcon('calendar-search')
+          .onClick(() => this.revealInCalendar(file, start)));
+      }
       menu.addItem((i) => i.setSection('action')
         .setTitle(done ? 'Mark not complete' : 'Mark complete')
         .setIcon(done ? 'rotate-ccw' : 'check-circle')
@@ -301,6 +307,14 @@ class TaskPlannerPlugin extends Plugin {
     const leaf = this.app.workspace.getLeaf('tab');
     await leaf.setViewState({ type: VIEW_TYPE, active: true });
     this.app.workspace.revealLeaf(leaf);
+  }
+
+  async revealInCalendar(file, start) {
+    await this.activateView();
+    const leaf = this.app.workspace.getLeavesOfType(VIEW_TYPE)[0];
+    if (!leaf) return;
+    if (leaf.loadIfDeferred) await leaf.loadIfDeferred();
+    if (leaf.view && leaf.view.reveal) leaf.view.reveal(file.path, start);
   }
 
   /* ---------------- task model ---------------- */
@@ -1789,7 +1803,8 @@ class CalendarView extends ItemView {
     /* The first pass has no header to measure, so fit once more now that it exists. */
     window.setTimeout(() => { if (this.applyFit()) this.render(); }, 0);
     this.plugin.loadCalendars(false).then(() => this.render());
-    window.setTimeout(() => this.scrollToNow(), 60);
+    /* A reveal issued while the view was opening owns the scroll position. */
+    window.setTimeout(() => { if (!this.revealPath) this.scrollToNow(); }, 60);
   }
 
   async onClose() {
@@ -1892,6 +1907,21 @@ class CalendarView extends ItemView {
     const nowMin = minOfDay(moment());
     const y = ((nowMin - s.startHour * 60) / 60) * s.pxPerHour;
     this.scroll.scrollTop = Math.max(0, y - this.scroll.clientHeight / 3);
+  }
+
+  /* Jump to a task's day and time and pulse its block. The highlight is keyed
+   * by path with a deadline rather than set on the element, because a feed
+   * reload or metadata change can re-render the grid mid-pulse. */
+  reveal(path, start) {
+    const s = this.plugin.settings;
+    this.focus = start.clone().startOf('day');
+    this.revealPath = path;
+    this.revealUntil = Date.now() + 2400;
+    this.render();
+    if (this.scroll && !s.fitToWindow) {
+      const y = ((minOfDay(start) - s.startHour * 60) / 60) * s.pxPerHour;
+      this.scroll.scrollTop = Math.max(0, y - this.scroll.clientHeight / 3);
+    }
   }
 
   days() {
@@ -2066,6 +2096,7 @@ class CalendarView extends ItemView {
     applyColor(el, p.colorSpecFor(t.category));
     el.dataset.path = t.path;
     el.dataset.date = dayKey(day);
+    if (this.revealPath === t.path && Date.now() < this.revealUntil) el.addClass('is-revealed');
     el.style.top = g.top + 'px';
     el.style.height = g.height + 'px';
     el.style.left = 'calc(' + g.left + '%)';

@@ -70,6 +70,8 @@ you are planning tomorrow instead of sleeping.
 - **Right-click a task in the Base** (or the file explorer, a tab, a link) and
   pick **Mark complete**: status goes to `done` and today's date lands in
   `completed`. **Mark not complete** undoes both.
+  Scheduled tasks also get **Reveal in calendar**, which opens the planner on
+  that day, scrolls to the start time and pulses the block.
 - **Auto status.** Scheduling sets a status; ticking a block writes `done` and a
   completion date, so your Done view fills up and you feel briefly excellent.
 
@@ -201,7 +203,7 @@ drag rows across. That's the app.
 | Drag a block's top/bottom edge   | Resizes the start or end                                        |
 | Click the tick circle            | Marks done and stamps the completion date                       |
 | Right-click a block              | Open note · mark done · duration · move to · unschedule         |
-| Right-click a task in a Base     | Mark complete · mark not complete                               |
+| Right-click a task in a Base     | Mark complete · mark not complete · reveal in calendar          |
 | `‹` `›` / **Today**              | Navigate; the step follows the current view mode                |
 | `−` `+` / fit button             | Zoom the hour height, or fit the whole day to the pane          |
 
